@@ -69,9 +69,15 @@ public class ParticleFilterAlg extends ParticleFilter
     
     /** Perform a filtering step. 
      * @param mcfg current estimation of the state*/
+//    public void next(double ir[], double gyro, double lwheel, double rwheel){
+    	
+    
     public void next(/*need IR outputs, Gyro outputs, the change in wheel rotation*/)
     {
-    	//ir values
+    	
+    	/*
+    	 * ir values, with the 3 IR sensor values, on ports 1, 2 + 3 
+    	 */
     	double ir[] = {0.0, 0.0, 0.0};
     	
     	//add gaussian to this, and get from model!!

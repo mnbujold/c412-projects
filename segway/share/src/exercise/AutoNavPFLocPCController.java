@@ -65,6 +65,19 @@ public class AutoNavPFLocPCController extends PCController
     	//This is the higher priority right now!!!
     	pf.next(/*need IR outputs, Gyro outputs, the change in wheel rotation*/);
         
+    
+    	/*
+    	 * pull the data from IR...
+    	 */
+    	
+    	/*
+    	 * pull the data from Gyro...
+    	 */
+    	
+    	/*
+    	 * Pull the data from wheel tach...
+    	 */
+    	
         // showing the true state in simulation
         if (pc().isSimulated())
             scene().update(pc().simDynState());
