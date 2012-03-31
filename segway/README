@@ -1,0 +1,61 @@
+
+Projects for HTWay type Segway robots.
+
+-------------------------------------------------------------------------------
+
+Info about the HTWay robot can be found here:
+http://www.hitechnic.com/blog/gyro-sensor/htway/
+
+-------------------------------------------------------------------------------
+
+Requirements :
+
+    linalg
+    geom3d
+    LWJGL (http://lwjgl.org/)
+    LEJOS (http://lejos.sourceforge.net/nxj.php)
+
+-------------------------------------------------------------------------------
+
+Create the following 4 projects in Eclipse :
+
+    segway-share (directory: share)
+    ~~~~~~~~~~~~
+        Java Build Path -> Libraries :
+                           add linalg.jar
+                           add geom3d.jar
+                           add lwjgl.jar
+                           add lwjgl-util.jar
+
+        setup the native library location of LWJGL at
+        Java Build Path -> Libraries -> lwjgl.jar -> Native Library Location
+        to lib/lwjgl-native/<your os>
+
+        see the following link for a more detailed description:
+        http://lwjgl.org/wiki/index.php?title=Setting_Up_LWJGL_with_Eclipse
+
+    segway-sim (directory: sim)
+    ~~~~~~~~~~
+        Java Build Path -> Projects :
+                           add segway-share
+        Java Build Path -> Libraries :
+                           add linalg.jar
+                           add geom3d.jar
+
+    segway-real-nxt (directory: real-nxt)
+    ~~~~~~~~~~~~~~~
+        Java Build Path -> Projects :
+                           add segway-share
+        Java Build Path -> Libraries : (converting to LEJOS NXJ project)
+                           (remove JRE if present)
+                           add classes.jar (lejos_nxj/lib/nxt/)
+
+    segway-real-pc (directory: real-pc)
+    ~~~~~~~~~~~~~~
+        Java Build Path -> Projects : 
+                           add segway-share
+        Java Build Path -> Libraries :
+                           add pccomm.jar (lejos_nxj/lib/pc/)
+                           add bluecove.jar (lejos_nxj/lib/pc/3rdparty/)
+                           add bluecove-gpl.jar (lejos_nxj/lib/pc/3rdparty/)
+

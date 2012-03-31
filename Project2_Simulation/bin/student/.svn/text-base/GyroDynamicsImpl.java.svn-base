@@ -1,0 +1,36 @@
+package student;
+
+import sensor.GyroDynamics;
+
+/**
+ * TODO Implement the noise-free gyroscope dynamics.
+ */
+public class GyroDynamicsImpl implements GyroDynamics
+{
+    @Override
+    public int offsetN()
+    {
+        return 100;
+    }
+    
+    @Override
+    public void reset()
+    {
+        // TODO Implement this!
+    }
+
+    @Override
+    public Parameters parameters()
+    {
+        // TODO Implement this!
+        throw new IllegalAccessError(
+                  "You have to implement the student.GyroDynamicsImpl class!");
+    }
+
+    @Override
+    public double nextValue(double avel, double dt)
+    {
+        // TODO Implement this!
+        return 0;
+    }
+}

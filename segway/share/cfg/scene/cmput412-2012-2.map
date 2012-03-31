@@ -1,0 +1,31 @@
+
+# All measurements are in millimeters and degrees.
+# Origin is fixed at the bottom-left point of the map.
+
+# table <x-size> <y-size> <wall-height> <wall-thickness>
+table 2726 2120 199 37
+
+# carpet <x> <y> <x-size> <y-size> <height>
+carpet 5 105 2716 1920 4
+
+# box <x> <y> <x-size> <y-size> <height> <elevation> <pitch> <yaw>
+box 0 1690 459 430 288 4 0 0
+box 795 965 430 459 288 4 0 42
+box 378 1386 312 410 125 292 0 0
+box 372 371 298 247 207 4 0 13
+box 1257 349 322 432 199 4 0 0
+box 2160 336 285 458 428 4 0 30
+box 2182 1017 458 285 428 4 0 62
+box 2518 1975 208 145 513 4 0 0
+box 987 1957 310 163 236 4 0 0
+
+# the tricky "box"
+box 1577 1685 238 169 37 4 0 203
+box 1577 1685 169 238 37 41 0 203
+box 1577 1685 238 169 37 78 0 203
+box 1577 1685 169 238 37 115 0 203
+
+# point <x> <y> <elevation>
+point 929 626 4
+point 2448 948 4
+

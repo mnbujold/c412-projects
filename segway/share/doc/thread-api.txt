@@ -1,0 +1,81 @@
+
+An abstract thread API makes it possible to spawn new real/simulated
+threads depending on the running mode (real/simulation).
+
+The UML diagram of the thread structure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    S : specialization
+    A : aggregation
+    << , >> , /|\ , \|/ : relation arrows
+
+Thread API (run and comm packages)
+~~~~~~~~~~
+                    /--------\
+                    | Thread |
+                    \--------/
+                         S
+                         |
+             /-----------x--------------\
+             |                          |
+        /---------\             /--------------\
+        | RobotPC |             | Communicator |
+        \---------/             \--------------/
+             S                  TODO: Should be eliminated later!
+             |
+        /----x----\
+        |         |
+    /-------\   /----\
+    | Robot |   | PC |
+    \-------/   \----/
+
+Thread implementations (run package)
+~~~~~~~~~~~~~~~~~~~~~~
+                                                    project:
+        /--------\                                  ~~~~~~~
+        | Thread |                                  segway-share
+        \--------/
+            S
+            |
+    /----------------\     /-------------\
+    | AbstractThread |A----| ThreadLogic |
+    \----------------/     \-------------/
+            S
+            |    /----------------\
+            x----| NXTRobotThread |                 segway-real-nxt
+            |    \----------------/
+            |
+            |    /-------------\
+            x----| NXTPCThread |                    segway-real-pc
+            |    \-------------/
+            |
+            |    /-----------------\
+            x----| SimulatedThread |                segway-sim
+                 \-----------------/
+
+Thread API implementation (run package)
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /----------------\
+    | NXTRobotThread |
+    \----------------/
+         S
+         |
+    /----------\     /-------\      /----------------\
+    | NXTRobot |----S| Robot |S-----| SimulatedRobot |
+    \----------/     \-------/      \----------------/
+                          |                 |
+                          S                 S
+                   /---------\     /------------------\     /-----------------\
+                   | RobotPC |S----| SimulatedRobotPC |----S| SimulatedThread |
+                   \---------/     \------------------/     \-----------------/
+                          S                 S
+                          |                 |
+    /-------\           /----\       /--------------\
+    | NXTPC |----------S| PC |S------|  SimulatedPC |
+    \-------/           \----/       \--------------/
+        S
+        |
+    /-------------\
+    | NXTPCThread |
+    \-------------/
+
