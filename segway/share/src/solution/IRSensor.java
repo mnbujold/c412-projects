@@ -1,4 +1,4 @@
-package exercise;
+package solution;
 
 import model.scene.SceneModel;
 import model.scene.SceneModelObject;

@@ -72,14 +72,9 @@ public class ParticleFilterAlg extends ParticleFilter
 //    public void next(double ir[], double gyro, double lwheel, double rwheel){
     	
     
-    public void next(/*need IR outputs, Gyro outputs, the change in wheel rotation*/)
+    public void next(double ir[], int motorL, int motorR, double gyroData)
     {
-    	
-    	/*
-    	 * ir values, with the 3 IR sensor values, on ports 1, 2 + 3 
-    	 */
-    	double ir[] = {0.0, 0.0, 0.0};
-    	
+    	System.out.println("Left motor: " + motorL + " Right motor: " + motorR);
     	//add gaussian to this, and get from model!!
     	//default mean=0
     	double delta_left=1.0 + rng().nextGaussian()*VAR_THETA;

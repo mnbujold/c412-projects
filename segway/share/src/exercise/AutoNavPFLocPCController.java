@@ -24,7 +24,7 @@ import geom3d.Point3D;
 public class AutoNavPFLocPCController extends PCController
 {
     /** Bluetooth name of the NXT robot. */
-    public static final String ROBOT_NAME = "nxt-robot";
+    public static final String ROBOT_NAME = "suzy";
     
     //--------------------------------------------------------------------------
     
@@ -35,6 +35,7 @@ public class AutoNavPFLocPCController extends PCController
     {
         super (pc, motionCfg, scene, view);
         mouseListener = new MouseListenerImpl();
+        
         commLogic = new CommunicatorLogicImpl();
         pc().createCommunicator(ROBOT_NAME, commLogic);
         
@@ -62,21 +63,45 @@ public class AutoNavPFLocPCController extends PCController
     @Override
     public void control() throws Exception
     {
-    	//This is the higher priority right now!!!
-    	pf.next(/*need IR outputs, Gyro outputs, the change in wheel rotation*/);
+    	double pitch = 0;
+        int dMrcL = 0, dMrcR = 0;
+        boolean isNewData = false;
+        synchronized (commLogic){
+//            isNewData = commLogic.isNewData;
+            if (isNewData)
+            {
+//                dMrcL = commLogic.dMrcL;
+//                dMrcR = commLogic.dMrcR;
+//                commLogic.dMrcL = commLogic.dMrcR = 0;
+                
+//                if (dist == null) dist = new int[commLogic.dist.length];
+//                for (int i = 0; i < dist.length; ++i)
+//                    dist[i] = commLogic.dist[i];
+                
+//                pitch = commLogic.pitch;
+//                System.out.println("pitch: " + commLogic.pitch);
+                //pitch = pc().simDynState().pitch(); // TODO !!!
+            }
+        }
         
-    
-    	/*
-    	 * pull the data from IR...
-    	 */
+        if (isNewData)
+        {
+            //System.out.println("obs: " + pitch + " , (" + dMrcL + " , " + dMrcR
+            //                           + ") , [" + dist[0] + "," + dist[1]
+            //                                    + "," + dist[2] + "]");
+            //pf.next(pitch, dMrcL, dMrcR, dist);
+            
+            // showing the true state in simulation
+            if (pc().isSimulated())
+                scene().update(pc().simDynState());
+        }
+        view().updateCanvas();
+        pc().msDelay(200);
+
+    	//This is the higher priority right now!!!
     	
-    	/*
-    	 * pull the data from Gyro...
-    	 */
-    	
-    	/*
-    	 * Pull the data from wheel tach...
-    	 */
+    	//pf.next(/*need IR outputs, Gyro outputs, the change in wheel rotation*/);
+ 
     	
         // showing the true state in simulation
         if (pc().isSimulated())
