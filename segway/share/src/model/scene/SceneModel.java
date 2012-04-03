@@ -113,6 +113,13 @@ public class SceneModel
     }
     public ParticleCloud particleCloud() { return particleCloud; }
     
+    public Drawer createDrawer()
+    {
+        Drawer d = new Drawer(this, carpet().height() + 0.5);
+        add(d);
+        return d;
+    }
+    
     //--------------------------------------------------------------------------
     
     /** Set the state of the scene model from the provided motion state. */

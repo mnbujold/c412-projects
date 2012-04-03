@@ -22,12 +22,7 @@ public class IRSensor extends DistanceSensor
         super (cfg, scene);
         
         try{
-        	  // Open the file that is the first 
-        	  // command line parameter
-        	  //FileInputStream fstream = new FileInputStream("model.txt");
-        	  // Get the object of DataInputStream
-        	  //DataInputStream in = new DataInputStream(fstream);
-          	FileInputStream fstream = new FileInputStream("../share/cfg/model.txt");
+        	FileInputStream fstream = new FileInputStream("../share/cfg/model.txt");
           	DataInputStream in = new DataInputStream(fstream);
           	
 //        	File aFile=new File("../share/cfg/model.txt");
