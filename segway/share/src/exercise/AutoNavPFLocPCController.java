@@ -1,5 +1,7 @@
 package exercise;
 
+import geom3d.Point3D;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -15,7 +17,6 @@ import visual.View;
 import comm.CommunicatorLogic;
 
 import control.PCController;
-import geom3d.Point3D;
 
 /**
  * An autonomously navigating controller
@@ -35,9 +36,8 @@ public class AutoNavPFLocPCController extends PCController
     {
         super (pc, motionCfg, scene, view);
         mouseListener = new MouseListenerImpl();
-        
         commLogic = new CommunicatorLogicImpl();
-        pc().createCommunicator(ROBOT_NAME, commLogic);
+        dist = null;
         
         pf = new ParticleFilterAlg(19, motionCfg, scene);
         scene.addParticleFilter(pf);
@@ -54,42 +54,43 @@ public class AutoNavPFLocPCController extends PCController
         
         // showing the true state in simulation
         if (pc().isSimulated())
-        {
             scene().update(pc().simDynState());
-        }
         view().updateCanvas();
+        
+        pc().createCommunicator(ROBOT_NAME, commLogic);
     }
     
     @Override
     public void control() throws Exception
     {
-    	double pitch = 0;
+        double pitch = 0;
         int dMrcL = 0, dMrcR = 0;
         boolean isNewData = false;
-        synchronized (commLogic){
-//            isNewData = commLogic.isNewData;
+        synchronized (commLogic)
+        {
+            isNewData = commLogic.isNewData;
             if (isNewData)
             {
-//                dMrcL = commLogic.dMrcL;
-//                dMrcR = commLogic.dMrcR;
-//                commLogic.dMrcL = commLogic.dMrcR = 0;
+                dMrcL = commLogic.dMrcL;
+                dMrcR = commLogic.dMrcR;
+                commLogic.dMrcL = commLogic.dMrcR = 0;
                 
-//                if (dist == null) dist = new int[commLogic.dist.length];
-//                for (int i = 0; i < dist.length; ++i)
-//                    dist[i] = commLogic.dist[i];
+                if (dist == null) dist = new int[commLogic.dist.length];
+                for (int i = 0; i < dist.length; ++i)
+                    dist[i] = commLogic.dist[i];
                 
-//                pitch = commLogic.pitch;
-//                System.out.println("pitch: " + commLogic.pitch);
+                pitch = commLogic.pitch;
+                System.out.println("pitch: " + commLogic.pitch);
                 //pitch = pc().simDynState().pitch(); // TODO !!!
             }
         }
         
         if (isNewData)
         {
-            //System.out.println("obs: " + pitch + " , (" + dMrcL + " , " + dMrcR
-            //                           + ") , [" + dist[0] + "," + dist[1]
-            //                                    + "," + dist[2] + "]");
-            //pf.next(pitch, dMrcL, dMrcR, dist);
+            System.out.print("obs: " + pitch + " , (" + dMrcL + " , " + dMrcR
+                                       + ") , [" + dist[0] + "," + dist[1]
+                                                + "," + dist[2] + "]");
+            pf.next(pitch, dMrcL, dMrcR, dist);
             
             // showing the true state in simulation
             if (pc().isSimulated())
@@ -97,63 +98,91 @@ public class AutoNavPFLocPCController extends PCController
         }
         view().updateCanvas();
         pc().msDelay(200);
-
-    	//This is the higher priority right now!!!
-    	
-    	//pf.next(/*need IR outputs, Gyro outputs, the change in wheel rotation*/);
- 
-    	
-        // showing the true state in simulation
-        if (pc().isSimulated())
-            scene().update(pc().simDynState());
-        
-        view().updateCanvas();
-        pc().msDelay(50);
-        //this is how we read from the robot channel??
-        //commLogic.channel().readByte();
     }
     
     //--------------------------------------------------------------------------
     
     private class CommunicatorLogicImpl extends CommunicatorLogic
     {
+        public CommunicatorLogicImpl() { dist = null; }
+        
         @Override
         public void initalize() throws Exception
         {
             super.initalize();
+            System.out.println("reading...");
             maxKeyCodes = channel().readByte();
+            System.out.println("maxKeyCodes: " + maxKeyCodes);
+            int len = channel().readByte();
+            System.out.println("len = " + len);
+            synchronized (this)
+            {
+                dist = new short[len];
+                distTmp = new short[len];
+                dMrcL = dMrcR = 0;
+                pitch = 0.0;
+                isNewData = false;
+            }
+            isControlRound = true;
         }
         
         @Override
         public void logic() throws Exception
         {
-            // TODO modify this to receive observations
-            
-            Set<Short> activeKeys = activeKeys();
-            synchronized (activeKeys)
+            if (isControlRound)
             {
-                if (activeKeys.contains((short)KeyEvent.VK_ESCAPE))
+                Set<Short> activeKeys = activeKeys();
+                synchronized (activeKeys)
                 {
-                    channel().writeByte((byte)-1);
-                    terminate();
-                }
-                else
-                {
-                    byte size = (byte) activeKeys.size();
-                    if (size > maxKeyCodes) size = maxKeyCodes;
-                    
-                    channel().writeByte(size);
-                    for (short keycode : activeKeys)
+                    if (activeKeys.contains((short)KeyEvent.VK_ESCAPE))
                     {
-                        channel().writeShort(keycode);
-                        if (--size == 0) break;
+                        channel().writeByte((byte)-1);
+                        terminate();
+                    }
+                    else
+                    {
+                        byte size = (byte) activeKeys.size();
+                        if (size > maxKeyCodes) size = maxKeyCodes;
+                        
+                        channel().writeByte(size);
+                        for (short keycode : activeKeys)
+                        {
+                            channel().writeShort(keycode);
+                            if (--size == 0) break;
+                        }
                     }
                 }
-                channel().flush();
+                channel().flush();                
             }
-            msDelay(100);
+            else
+            {
+                channel().writeByte((byte)-2);
+                channel().flush();
+                
+                float pitch = channel().readFloat();
+                short dL = channel().readShort();
+                short dR = channel().readShort();
+                for (int i = 0; i < distTmp.length; ++i)
+                    distTmp[i] = channel().readShort();
+                
+                synchronized (this)
+                {
+                    this.pitch = pitch;
+                    dMrcL += dL;
+                    dMrcR += dR;
+                    for (int i = 0; i < dist.length; ++i)
+                        dist[i] = distTmp[i];
+                    isNewData = true;
+                }
+            }
+            isControlRound = !isControlRound;
+            msDelay(50);
         }
         
+        private short[] dist, distTmp;
+        private int dMrcL, dMrcR;
+        private double pitch;
+        private boolean isControlRound, isNewData;
         private byte maxKeyCodes;
     }
     
@@ -181,6 +210,8 @@ public class AutoNavPFLocPCController extends PCController
     public MouseListener mouseListener() { return mouseListener; }
     
     //--------------------------------------------------------------------------
+    
+    private int[] dist;
     
     private final ParticleFilterAlg pf;
     private final CommunicatorLogicImpl commLogic;

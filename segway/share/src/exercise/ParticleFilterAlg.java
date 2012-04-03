@@ -69,19 +69,15 @@ public class ParticleFilterAlg extends ParticleFilter
     
     /** Perform a filtering step. 
      * @param mcfg current estimation of the state*/
-//    public void next(double ir[], double gyro, double lwheel, double rwheel){
+    public void next(double pitch, int dMrcL, int dMrcR, int[] ir) {
     	
-    
-    public void next(double ir[], int motorL, int motorR, double gyroData)
-    {
-    	System.out.println("Left motor: " + motorL + " Right motor: " + motorR);
     	//add gaussian to this, and get from model!!
     	//default mean=0
     	double delta_left=1.0 + rng().nextGaussian()*VAR_THETA;
     	double delta_right=1.0 + rng().nextGaussian()*VAR_THETA;
     	
     	//model for gyro
-    	double pitch=0.0 + rng().nextGaussian()*VAR_PSI;
+    	//double pitch=0.0 + rng().nextGaussian()*VAR_PSI;
     	
 
     	//find out where to put wheel size
@@ -167,3 +163,5 @@ public class ParticleFilterAlg extends ParticleFilter
     private DistanceResult distanceResult;
 
 }
+
+

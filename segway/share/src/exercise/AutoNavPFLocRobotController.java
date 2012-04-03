@@ -3,7 +3,7 @@ package exercise;
 import java.awt.event.KeyEvent;
 
 import run.Robot;
-
+import run.ThreadLogic;
 import comm.CommunicatorLogic;
 
 import control.RobotController;
@@ -14,7 +14,7 @@ import control.RobotController;
 public class AutoNavPFLocRobotController extends RobotController
 {
     // number of samples used to measure the gyroscope bias
-    static final int GYRO_BIAS_N = 100;
+    static final int GYRO_BIAS_N = 200;
     
     // gyroscope sign (-1 or +1) set based on the sensor orientation
     static final int GYRO_SIGN = +1;
@@ -45,13 +45,19 @@ public class AutoNavPFLocRobotController extends RobotController
     // then robot must have fallen. In milliseconds.
     static final int TIME_FALL_LIMIT = 500;
     
+    // Target delay between two consecutive control steps (ms).
+    static final int CONTROL_DELAY = 10;
+
+    // Target delay between two consecutive observer steps (ms). 
+    static final int OBSERVER_DELAY = 3;
+    
     //--------------------------------------------------------------------------
     
     public AutoNavPFLocRobotController(Robot robot)
     {
         super (robot);
         commLogic = new CommunicatorLogicImpl();
-        robot().createCommunicator(commLogic);
+        observer = new Observer();
     }
     
     @Override
@@ -79,6 +85,8 @@ public class AutoNavPFLocRobotController extends RobotController
         
         prevTime = 0;
         tMotorPosOk = 0;
+        
+        robot().createCommunicator(commLogic);
     }
     
     @Override
@@ -92,6 +100,7 @@ public class AutoNavPFLocRobotController extends RobotController
             tMotorPosOk = time;
             robot().resetLeftRotationCounter();
             robot().resetRightRotationCounter();
+            robot().spawn("observer", observer);
             robot().msDelay(5);
             return;
         }
@@ -100,6 +109,7 @@ public class AutoNavPFLocRobotController extends RobotController
         prevTime = time;
         
         double gyroValue = GYRO_SIGN * robot().readGyro() - gyroOffset;
+        
         gyroAngle += gyroValue * dt;
         
         int mrcLeft = robot().leftRotationCounter();
@@ -107,7 +117,9 @@ public class AutoNavPFLocRobotController extends RobotController
         int mrcSum = mrcLeft + mrcRight;
         int motorDiff = mrcLeft - mrcRight;
         int mrcDelta = mrcSum - mrcSumPrev;
-
+        motorPosition += mrcDelta;
+        motorPosition -= motorControlDrive * dt;
+                
         double motorControlDrive = 0.0;
         double motorControlSteer = 0.0;
         synchronized (commLogic)
@@ -115,10 +127,7 @@ public class AutoNavPFLocRobotController extends RobotController
             motorControlDrive = this.motorControlDrive;
             motorControlSteer = this.motorControlSteer;
         }
-        
-        motorPosition += mrcDelta;
-        motorPosition -= motorControlDrive * dt;
-        
+
         double motorSpeed =
             (mrcDelta + mrcDeltaP1 + mrcDeltaP2 + mrcDeltaP3) / (4.0 * dt);
         
@@ -144,7 +153,33 @@ public class AutoNavPFLocRobotController extends RobotController
         
         robot().controlLeftMotor(limitPower(lPower));
         robot().controlRightMotor(limitPower(rPower));
-        robot().msDelay(10);
+        
+        int delay = CONTROL_DELAY + (int)(time - robot().currentTimeMillis());
+        if (0 < delay) robot().msDelay(delay);
+    }
+    
+    //--------------------------------------------------------------------------
+    
+    private class Observer extends ThreadLogic
+    {
+        @Override
+        public void run()
+        {
+            pitch = 0.0;
+            while (true)
+            {
+                update();
+                msDelay(OBSERVER_DELAY);
+            }
+        }
+        
+        public synchronized double update()
+        {
+            pitch += 1;
+            return pitch;
+        }
+        
+        private double pitch = 0.0;
     }
     
     //--------------------------------------------------------------------------
@@ -159,19 +194,50 @@ public class AutoNavPFLocRobotController extends RobotController
         {
             super.initalize();
             channel().writeByte(MAX_KEY_CODES);
+            channel().writeByte((byte)robot().readDistances().length);
             channel().flush();
+            
+            mrcPrevL = robot().leftRotationCounter();
+            mrcPrevR = robot().rightRotationCounter();
         }
         
         @Override
         public void logic() throws Exception
         {
             byte n = channel().readByte();
-
             switch (n)
             {
-                case -1 : terminate(); break; // quit
+                case -1 :
+                {
+                    // termination request
+                    terminate();
+                    break;
+                }
+                case -2 :
+                {
+                    // observation request
+                    int mrcL = robot().leftRotationCounter();
+                    int mrcR = robot().rightRotationCounter();
+                    double pitch = observer.update();
+                    int d[] = robot().readDistances();
+                    
+                    short deltaL = (short)(mrcL - mrcPrevL);
+                    short deltaR = (short)(mrcR - mrcPrevR);
+                    
+                    channel().writeFloat((float)pitch);
+                    channel().writeShort(deltaL);
+                    channel().writeShort(deltaR);
+                    for (int i = 0; i < d.length; ++i)
+                        channel().writeShort((short)d[i]);
+                    channel().flush();
+                    
+                    mrcPrevL = mrcL;
+                    mrcPrevR = mrcR;
+                    break;
+                }
                 default :
-                    // drive
+                {
+                    // receiving controls
                     boolean controlAccelChanged = false;
                     boolean controlTurnChanged = false;
                     for (byte i = 0; i < n; ++i)
@@ -229,14 +295,18 @@ public class AutoNavPFLocRobotController extends RobotController
                                 motorControlTurn * CONTROL_SPEED;
                     }
                     break;
+                }
             }
         }
+        
+        private int mrcPrevL, mrcPrevR;
     }
     
     //--------------------------------------------------------------------------
     
     private static final double MILLISEC_TO_SEC = 1e-3;    
     private final CommunicatorLogicImpl commLogic;
+    private final Observer observer;
     
     private long prevTime, tMotorPosOk;
     private int mrcSumPrev, mrcDeltaP1, mrcDeltaP2, mrcDeltaP3;

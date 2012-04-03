@@ -66,7 +66,8 @@ public final class NXTPCCommunicator extends NXTPCThread implements Communicator
                     synchronized (comm) { comm.channel = channel; }
                     System.out.println("Channel is ready.");
                     initalize();
-                    while (comm.isRunning()) logic();
+                    while (comm.isRunning()) 
+                    	logic();
                 }
                 else { System.err.println("Failed to connect to "
                                           + comm.device() + "!"); }

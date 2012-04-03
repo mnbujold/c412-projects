@@ -50,9 +50,9 @@ public class Balance {
 			
 			if (ir1.getDistance() < 100)
 				ObstacleRight = true;
-			if (ir2.getDistance() < 100)
+			else if (ir2.getDistance() < 100)
 				ObstacleFront = true;
-			if (ir3.getDistance() < 100)
+			else if (ir3.getDistance() < 100)
 				ObstacleLeft = true;
 			
 			if (ObstacleFront == true){
@@ -64,14 +64,14 @@ public class Balance {
 				Thread.sleep(100);
 				segway.wheelDriver(0, 0);
 							}
-			else if (ObstacleLeft == true){
+			if (ObstacleLeft == true){
 				/* Turn right */
 				ObstacleLeft = false;
 				segway.wheelDriver(SPEED, -SPEED);
 				Thread.sleep(100);
 				segway.wheelDriver(0, 0);
 			}
-			else if (ObstacleRight == true){
+			if (ObstacleRight == true){
 				/* Turn left */
 				ObstacleRight = false;
 				segway.wheelDriver(-SPEED, SPEED);
@@ -79,6 +79,7 @@ public class Balance {
 				segway.wheelDriver(0, 0);
 			}
 		}
+		
 	}
 	
 }
