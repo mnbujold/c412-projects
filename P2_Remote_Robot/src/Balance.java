@@ -2,6 +2,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
@@ -19,7 +20,7 @@ import lejos.nxt.comm.Bluetooth;
 public class Balance {
 		
 	public static void main(String[] args) throws Exception{
-		int SPEED = 80;
+		int SPEED = 60;
         LCD.drawString("Waiting...",0,0);
 		LCD.refresh();
 		
@@ -38,14 +39,19 @@ public class Balance {
 		MotorPort mp_right = MotorPort.B;
 		NXTMotor motor_right = new NXTMotor(mp_right);
 
-		MySegway segway = new MySegway(motor_left, motor_right, gs, 5.6);
+//		MySegway segway = new MySegway(motor_left, motor_right, gs, 5.6);
 		
+		while(!Button.ESCAPE.isPressed()){
 		boolean ObstacleFront = false;
 		boolean ObstacleLeft = false;
 		boolean ObstacleRight = false;
 		
 		
+		MySegway segway = new MySegway(motor_left, motor_right, gs, 5.6);
+		
+		
 		while(true){
+			
 			segway.wheelDriver(SPEED, SPEED);
 			
 			if (ir1.getDistance() < 100)
@@ -81,6 +87,6 @@ public class Balance {
 		}
 		
 	}
-	
+	}
 }
 	
