@@ -39,9 +39,7 @@ public class Balance {
 		MotorPort mp_right = MotorPort.B;
 		NXTMotor motor_right = new NXTMotor(mp_right);
 
-//		MySegway segway = new MySegway(motor_left, motor_right, gs, 5.6);
-		
-		while(!Button.ESCAPE.isPressed()){
+	
 		boolean ObstacleFront = false;
 		boolean ObstacleLeft = false;
 		boolean ObstacleRight = false;
@@ -86,7 +84,6 @@ public class Balance {
 			}
 		}
 		
-	}
 	}
 }
 	
