@@ -39,10 +39,14 @@ public class Balance {
 		MotorPort mp_right = MotorPort.B;
 		NXTMotor motor_right = new NXTMotor(mp_right);
 
+<<<<<<< HEAD
 //		MySegway segway = new MySegway(motor_left, motor_right, gs, 5.6);
 		
 		
 			
+=======
+	
+>>>>>>> codegen
 		boolean ObstacleFront = false;
 		boolean ObstacleLeft = false;
 		boolean ObstacleRight = false;
