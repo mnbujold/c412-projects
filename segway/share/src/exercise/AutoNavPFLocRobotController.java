@@ -9,8 +9,8 @@ import comm.CommunicatorLogic;
 import control.RobotController;
 
 /**
- * Low-level robot controller navigated by an AutoNavPFLocPCController.
- */
+* Low-level robot controller navigated by an AutoNavPFLocPCController.
+*/
 public class AutoNavPFLocRobotController extends RobotController
 {
     // number of samples used to measure the gyroscope bias
@@ -26,9 +26,9 @@ public class AutoNavPFLocRobotController extends RobotController
     static final double KPOS = 0.07;
     static final double KSPEED = 0.1;
     
-    // This constant aids in drive control. When the robot starts moving 
-    // because of user control, this constant helps get the robot leaning 
-    // in the right direction. Similarly, it helps bring robot 
+    // This constant aids in drive control. When the robot starts moving
+    // because of user control, this constant helps get the robot leaning
+    // in the right direction. Similarly, it helps bring robot
     // to a stop when stopping.
     static final double KDRIVE = -0.02;
     
@@ -48,7 +48,7 @@ public class AutoNavPFLocRobotController extends RobotController
     // Target delay between two consecutive control steps (ms).
     static final int CONTROL_DELAY = 10;
 
-    // Target delay between two consecutive observer steps (ms). 
+    // Target delay between two consecutive observer steps (ms).
     static final int OBSERVER_DELAY = 3;
     
     //--------------------------------------------------------------------------
@@ -304,7 +304,7 @@ public class AutoNavPFLocRobotController extends RobotController
     
     //--------------------------------------------------------------------------
     
-    private static final double MILLISEC_TO_SEC = 1e-3;    
+    private static final double MILLISEC_TO_SEC = 1e-3;
     private final CommunicatorLogicImpl commLogic;
     private final Observer observer;
     

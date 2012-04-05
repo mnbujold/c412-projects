@@ -19,9 +19,9 @@ import comm.CommunicatorLogic;
 import control.PCController;
 
 /**
- * An autonomously navigating controller
- * based on a particle filtering localization.
- */
+* An autonomously navigating controller
+* based on a particle filtering localization.
+*/
 public class AutoNavPFLocPCController extends PCController
 {
     /** Bluetooth name of the NXT robot. */
@@ -35,6 +35,7 @@ public class AutoNavPFLocPCController extends PCController
                                     View view)
     {
         super (pc, motionCfg, scene, view);
+        pather = new PathFinderAlg(scene);
         mouseListener = new MouseListenerImpl();
         commLogic = new CommunicatorLogicImpl();
         dist = null;
@@ -80,19 +81,28 @@ public class AutoNavPFLocPCController extends PCController
                     dist[i] = commLogic.dist[i];
                 
                 pitch = commLogic.pitch;
-                System.out.println("pitch: " + commLogic.pitch);
+                //System.out.println("pitch: " + commLogic.pitch);
                 //pitch = pc().simDynState().pitch(); // TODO !!!
             }
         }
         
         if (isNewData)
         {
-            System.out.print("obs: " + pitch + " , (" + dMrcL + " , " + dMrcR
-                                       + ") , [" + dist[0] + "," + dist[1]
-                                                + "," + dist[2] + "]");
+            //System.out.print("obs: " + pitch + " , (" + dMrcL + " , " + dMrcR
+                                       //+ ") , [" + dist[0] + "," + dist[1]
+                                                //+ "," + dist[2] + "]");
             pf.next(pitch, dMrcL, dMrcR, dist);
             
-            // showing the true state in simulation
+            //if the dynamic point has been set, commence pathfinding to here
+            if(scene().isOnFloor(scene().selectedPoint().position().x(), 
+            		scene().selectedPoint().position().y())){
+                //System.out.println(scene().selectedPoint().position().x()+" "+
+                		//scene().selectedPoint().position().y());
+            	pather.setGoal(scene().selectedPoint().position());
+
+            }
+            
+            
             if (pc().isSimulated())
                 scene().update(pc().simDynState());
         }
@@ -110,11 +120,11 @@ public class AutoNavPFLocPCController extends PCController
         public void initalize() throws Exception
         {
             super.initalize();
-            System.out.println("reading...");
+            //System.out.println("reading...");
             maxKeyCodes = channel().readByte();
-            System.out.println("maxKeyCodes: " + maxKeyCodes);
+            //System.out.println("maxKeyCodes: " + maxKeyCodes);
             int len = channel().readByte();
-            System.out.println("len = " + len);
+            //System.out.println("len = " + len);
             synchronized (this)
             {
                 dist = new short[len];
@@ -152,7 +162,7 @@ public class AutoNavPFLocPCController extends PCController
                         }
                     }
                 }
-                channel().flush();                
+                channel().flush();
             }
             else
             {
@@ -199,6 +209,7 @@ public class AutoNavPFLocPCController extends PCController
                 p.setZ(scene().isOnCarpet(p.x(), p.y())
                        ? (1+scene().carpet().height()) : 1);
                 scene().selectedPoint().setPosition(p);
+                //System.out.println(p.x()+" "+p.y());
             }
             else scene().selectedPoint().setPosition(null);
         }
@@ -216,4 +227,5 @@ public class AutoNavPFLocPCController extends PCController
     private final ParticleFilterAlg pf;
     private final CommunicatorLogicImpl commLogic;
     private final MouseListenerImpl mouseListener;
+    private final PathFinderAlg pather;
 }
