@@ -23,6 +23,7 @@ public class PathFinderAlg {
 	public void setGoal(Point3D g){goal=g;}
 	public Point3D getGoal(){return goal;}
 	
+	//find the closest graphed point to the origin and the goal
 	public void computePath(Point3D origin){
 		double min=1000000;
 		double dist;
@@ -46,15 +47,23 @@ public class PathFinderAlg {
 			}
 		}
 		assert(lastIDX>-1);
+		//set up the steps for this path
+		setUpPath(firstIDX, lastIDX);
 	}
 	
+	//set up the steps for this path from firstIDX and last IDX
 	private void setUpPath(int firstIDX, int lastIDX){
 		LinkedList<Point3D> openset=new LinkedList<Point3D>();
 		Point3D first=indexToPoints.get(firstIDX);
 		openset.add(first);
 		LinkedList<Point3D> closedset=new LinkedList<Point3D>();
 		
-		//LinkedList<Double> indexToGscore=
+		LinkedList<Double> indexToGscore=new LinkedList<Double>();
+		for(int i=0; i<indexToPoints.size(); i++){
+			indexToGscore.add(0.0);
+			
+		}
+		
 		
 	}
 	

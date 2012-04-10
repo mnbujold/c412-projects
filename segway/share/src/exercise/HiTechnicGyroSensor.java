@@ -9,9 +9,9 @@ import ode.ODESolver;
 import ode.RK4;
 
 /**
- * Model of a HiTechnic gyroscope.
- * http://www.hitechnic.com/cgi-bin/commerce.cgi?preadd=action&key=NGY1044
- */
+* Model of a HiTechnic gyroscope.
+* http://www.hitechnic.com/cgi-bin/commerce.cgi?preadd=action&key=NGY1044
+*/
 public class HiTechnicGyroSensor extends GyroSensor
 {
     public HiTechnicGyroSensor(GyroSensorConfig cfg)

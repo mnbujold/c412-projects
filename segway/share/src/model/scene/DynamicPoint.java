@@ -13,7 +13,7 @@ public class DynamicPoint extends AbstractSceneModelObject
     public DynamicPoint(SceneModel scene)
     {
         this.scene = scene;
-        position = new Point3D();
+        position = new Point3D(-1, -1, -1);
         setEnabled(false);
         
         double w = 15, l = 70;
