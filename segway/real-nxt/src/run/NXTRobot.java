@@ -29,7 +29,9 @@ public final class NXTRobot extends NXTRobotThread implements Robot
     private static final MotorPort RIGHT_MOTOR = MotorPort.B;
     private static final SensorPort GYRO_PORT = SensorPort.S4;
     
-    private static final SensorPort[] IR_PORTS = { SensorPort.S1, SensorPort.S2, SensorPort.S3 };
+    private static final SensorPort[] IR_PORTS = {SensorPort.S3,
+                                                   SensorPort.S1};
+                                                   //,SensorPort.S4 };
     
     private static RobotController CREATE_CONTROLLER(Robot robot)
     {
