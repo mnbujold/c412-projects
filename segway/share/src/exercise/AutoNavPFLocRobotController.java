@@ -244,28 +244,36 @@ public class AutoNavPFLocRobotController extends RobotController
                         switch (channel().readShort())
                         {
                             case KeyEvent.VK_UP :
+                            	//System.out.println("up");
                                 controlAccelChanged = true;
-                                motorControlAccel += 0.25;
-                                if (motorControlAccel > 1.0)
-                                    motorControlAccel = 1.0;
+                                //motorControlAccel += 0.25;
+                                //if (motorControlAccel > 1.0)
+                                    //motorControlAccel = 1.0;
+                                motorControlAccel = 0.5;
                                 break;
                             case KeyEvent.VK_DOWN :
+                            	//System.out.println("down");
                                 controlAccelChanged = true;
-                                motorControlAccel -= 0.25;
-                                if (motorControlAccel < -1.0)
-                                    motorControlAccel = -1.0;
+                                //motorControlAccel -= 0.25;
+                                //if (motorControlAccel < -1.0)
+                                    //motorControlAccel = -1.0;
+                                motorControlAccel = -0.5;
                                 break;
                             case KeyEvent.VK_LEFT :
+                            	//System.out.println("left");
                                 controlTurnChanged = true;
-                                motorControlTurn -= 0.1;
-                                if (motorControlTurn < -1.0)
-                                    motorControlTurn = -1.0;
+                                //motorControlTurn -= 0.1;
+                                //if (motorControlTurn < -1.0)
+                                	//motorControlTurn = -1.0;
+                                motorControlTurn = -0.7;
                                 break;
                             case KeyEvent.VK_RIGHT :
+                            	//System.out.println("right");
                                 controlTurnChanged = true;
-                                motorControlTurn += 0.1;
-                                if (motorControlTurn > 1.0)
-                                    motorControlTurn = 1.0;
+                                //motorControlTurn += 0.1;
+                                //if (motorControlTurn > 1.0)
+                                    //motorControlTurn = 1.0;
+                                motorControlTurn = 0.7;
                                 break;
                         }
                     

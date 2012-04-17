@@ -9,6 +9,7 @@ import geom3d.Point3D;
  */
 public class Box extends AbstractSceneModelObject
 {
+	// Position, Size x, size y, height, pitch (dont worry about), yaw
     public Box(Point3D position,
                double dX, double dY, double dZ,
                double pitch, double yaw)
@@ -20,6 +21,7 @@ public class Box extends AbstractSceneModelObject
         
         bricks = new Parallelepiped[]{brick};
         brickColors = new Color[]{new Color(150, 125, 85)};
+         
     }
     
     @Override
@@ -32,4 +34,5 @@ public class Box extends AbstractSceneModelObject
     
     private final Parallelepiped[] bricks;
     private final Color[] brickColors;
+    
 }

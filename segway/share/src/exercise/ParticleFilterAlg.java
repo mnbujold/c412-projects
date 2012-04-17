@@ -30,17 +30,14 @@ public class ParticleFilterAlg extends ParticleFilter
         irSensor = new IRSensor[dCfg.length];
         for (int i = 0; i < irSensor.length; ++i){
             irSensor[i] = new IRSensor(dCfg[i], scene);
-            //((IRSensor)irSensor[i]).init();
         }
     }
     
     //--------------------------------------------------------------------------
-    private static final double VAR_PSI = 0.01;//for pitch
     private static final double STD_PSI = 0.01;
-    //private static final double VAR_THETA = 0.05;//for wheels
     private static final double STD_THETA = 0.1;
     private static final double EFF_RATIO = 0.2;
-    private static final double MIN_WEIGHT = 1e-20;
+    private static final double MIN_WEIGHT = 1e-10;
     
     //--------------------------------------------------------------------------
 
@@ -59,6 +56,7 @@ public class ParticleFilterAlg extends ParticleFilter
                                     : clouds()[0].get(j).weight();
                 pC.set(j, randomize(new Particle(), w));
                 putParticleToInit1(pC.get(j));
+                //putParticleToInit2(pC.get(j));
                 sumW += w;
             }
             for (int j = 0; j < N; ++j)
@@ -73,23 +71,63 @@ public class ParticleFilterAlg extends ParticleFilter
     void putParticleToInit1(Particle p)
     {
         final int n = scene().fixedPoints().size();
-        double range = 15; // mm
+        double range = 30; // mm
         Point3D loc = scene().fixedPoints().get(rng().nextInt(n)).position();
         p.setX(loc.x() + Statistics.uniform(rng(), -range, range));
         p.setY(loc.y() + Statistics.uniform(rng(), -range, range));
         p.setPitch(0); p.setThetaL(0); p.setThetaR(0);
     }
     
+    void putParticleToInit2(Particle p)
+    {
+        p.setX(Statistics.uniform(rng(), 0, scene().floor().width()));
+        p.setY(Statistics.uniform(rng(), 0, scene().floor().height()));
+        p.setPitch(0); p.setThetaL(0); p.setThetaR(0);
+    }
+    
+    //returns the highest weighted particle
+    public Particle getHighestWeight(){
+    	ParticleCloud cV = particles();
+    	double max=-100000;
+    	int highest=-1;
+    	Particle cur;
+    	for (int i = 0; i < cV.size(); ++i){
+    		cur=cV.get(i);
+    		if(cur.weight()>max){
+    			max=cur.weight();
+    			highest=i;
+    		}
+    	}
+    	return cV.elementAt(highest);
+    }
+    
+
+	public boolean lost() {
+		ParticleCloud cV = particles();
+		
+		double maxY =-1;
+		double maxX = -1;
+		double minY =1000000;
+		double minX =1000000;
+		for (Particle p : cV){
+			if(p.x()<minX)
+				minX=p.x();
+			else if (p.x()>maxX)
+				maxX=p.x();
+			if(p.y()<minY)
+				minY=p.y();
+			else if (p.y()>maxY)
+				maxY=p.y();
+		}
+		if(maxY-minY>LOST_THRESH || maxX-minX>LOST_THRESH){
+			//System.out.println((maxY-minY)+" "+(maxX-minX));
+			return true;
+		}
+		return false;
+	}
+    
     public void next(double pitch, int dMrcL, int dMrcR, int[] ir)
     {
-        // Recommended work flow:
-        //      cV = particles() -> filtering process -> cA = nextCloud()
-        //      optionally use cB = nextCloud(), i.e. for re-sampling
-        //      compute the robot position estimate -> estP
-        //      setCloudAndEstimate(cA or cB, estP)
-        
-        //System.out.println("--------------------");
-        
         ParticleCloud cV = particles();
         ParticleCloud cA = nextCloud();
         
@@ -117,7 +155,6 @@ public class ParticleFilterAlg extends ParticleFilter
             dThetaSum = dThetaL + dThetaR;
             x = pFrom.x() + halfR * dThetaSum * Math.cos(phi);
             y = pFrom.y() + halfR * dThetaSum * Math.sin(phi);
-            //System.out.println("xy: " + x + " , " + y);
             
             pTo.setX(x);
             pTo.setY(y);
@@ -126,9 +163,7 @@ public class ParticleFilterAlg extends ParticleFilter
             
             w = pFrom.weight();
             pos.setX(x); pos.setY(y);
-            //added this: if the position is inside a box, set weight to 0
-            if(false);
-            else if (scene().isOnFloor(x, y)){
+            if (scene().isOnFloor(x, y)){
             	for (j = 0; j < ir.length; ++j)
             	{
             		scene().realDistance(irSensor[j].cfg(),
@@ -140,15 +175,20 @@ public class ParticleFilterAlg extends ParticleFilter
             	}
             }
             else{
+            	//add if it is inside a box
             	w=0;
             }
             
-            if (w < MIN_WEIGHT) w = MIN_WEIGHT;
+            if (w < MIN_WEIGHT){
+            	if(rng().nextDouble()>RETHROW){
+            		pTo.setX(pTo.x()+Statistics.gaussian(rng(), 0, X_STD));
+            		pTo.setY(pTo.y()+Statistics.gaussian(rng(), 0, Y_STD));
+            	}
+            	w = MIN_WEIGHT;
+            }
             wSum += w;
             pTo.setWeight(w);
         }
-        
-        assert (wSum != 0); // TODO
         
         // normalizing and computing the position estimate particle
         
@@ -191,9 +231,7 @@ public class ParticleFilterAlg extends ParticleFilter
         else setCloudAndEstimate(cA, estP);
     }
     
-    
-    /** Perform a filtering step.
-* @param mcfg current estimation of the state*/
+    //leftover filtering step: does not work
     /*
     public void next(double pitch, int dMrcL, int dMrcR, int[] ir) {
     //System.out.println("next");
@@ -307,9 +345,6 @@ public class ParticleFilterAlg extends ParticleFilter
      }
      else setCloudAndEstimate(cA, estP);
         
-        
-        
-        
      //setCloudAndEstimate(cA, estP);
      
      //ParticleCloud cB = nextCloud();
@@ -330,10 +365,17 @@ public class ParticleFilterAlg extends ParticleFilter
 	Particle estP = cA.get(rng().nextInt(cA.size()));
 	setCloudAndEstimate(cA, estP);
     }*/
+    
+    private final double RETHROW=0.995;
+    private final double LOST_THRESH=200;
+    private final double X_STD=30;
+    private final double Y_STD=X_STD;
+    
     private final DistanceSensor[] irSensor;
     private final Point3D pos;
     private DistanceResult distanceResult;
     private final double halfR;
+
 
 }
 

@@ -39,6 +39,7 @@ public class Balance {
 		MotorPort mp_right = MotorPort.B;
 		NXTMotor motor_right = new NXTMotor(mp_right);
 
+		boolean runWanderingHobo = false;
 	
 		boolean ObstacleFront = false;
 		boolean ObstacleLeft = false;
@@ -48,7 +49,7 @@ public class Balance {
 		MySegway segway = new MySegway(motor_left, motor_right, gs, 5.6);
 		
 		
-		while(true){
+		while(runWanderingHobo){
 			
 			segway.wheelDriver(SPEED, SPEED);
 			

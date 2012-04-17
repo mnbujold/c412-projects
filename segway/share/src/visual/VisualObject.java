@@ -168,7 +168,7 @@ public class VisualObject
     {
         
         float z = d.z();
-        GL11.glLineWidth(d.width());
+        if (d.width() != 1f) GL11.glLineWidth(d.width());
                     
         GL11.glBegin(GL11.GL_LINE);
         for (Drawer.Line line : d.shownLines())
@@ -205,6 +205,8 @@ public class VisualObject
             GL11.glRectf(rect.x1(), rect.y1(), rect.x2(), rect.y2());
         }
         GL11.glPopMatrix();
+        
+        if (d.width() != 1f) GL11.glLineWidth(1f);
     }
 
     //--------------------------------------------------------------------------

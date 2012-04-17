@@ -24,6 +24,8 @@ class VisualCanvas extends EngineCanvas
     VisualCanvas(ViewConfig cfg, SceneModel scene)
     throws Exception
     {
+        super (scene);
+        
         this.cfg = cfg;
         this.scene = scene;
         visualObjects = new LinkedList<VisualObject>();

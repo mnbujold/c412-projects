@@ -8,12 +8,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import localize.ParticleFilter;
 import model.motion.MotionConfig;
 import model.motion.State;
+import model.scene.tool.Plot;
+import model.scene.tool.SceneTool;
 import model.sensor.DistanceSensorConfig;
 
 /**
@@ -43,6 +47,7 @@ public class SceneModel
         startTime = -1;
         objects = new LinkedList<SceneModelObject>();
         objectsToHit = new LinkedList<SceneModelObject>();
+        plotTools = new HashSet<Plot>();
         boxes = new LinkedList<Box>();
         fixedPoints = new LinkedList<FixedPoint>();
         selectedPoint = new DynamicPoint(this);
@@ -86,6 +91,16 @@ public class SceneModel
     {
         objects.addLast(obj);
         if (obj.canBeHit()) objectsToHit.addLast(obj);
+    }
+    
+    public Set<Plot> plotTools() { return plotTools; }
+    public synchronized void addTool(SceneTool tool)
+    {
+        if (tool instanceof Plot) plotTools.add((Plot)tool);
+    }
+    public synchronized void removeTool(SceneTool tool)
+    {
+        if (tool instanceof Plot) plotTools.remove(tool);
     }
 
     /** @return distance sensor configurations */
@@ -366,4 +381,5 @@ public class SceneModel
     private double startTime, elapsedTime;
     private final LinkedList<SceneModelObject> objects;
     private final LinkedList<SceneModelObject> objectsToHit;
+    private final HashSet<Plot> plotTools;
 }

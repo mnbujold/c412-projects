@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import model.scene.Color;
+import model.scene.SceneModel;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -26,16 +27,22 @@ import org.lwjgl.util.glu.GLU;
  */
 public abstract class EngineCanvas extends AWTGLCanvas
 {
-    public EngineCanvas()
+    public EngineCanvas(SceneModel scene)
     throws LWJGLException
     {
+        this.scene = scene;
         info = new AtomicReference<Info>(null);
         look = new Look();
+        engineTools = new EngineTools(this);
         
         backgroundColor = new Color(0, 0, 0);
         isBackgroundColorChanged = true;
         hasWindowSizeModified = true;
     }
+    
+    SceneModel scene() { return scene; }
+    int currentWidth() { return currentWidth; }
+    int currentHeight() { return currentHeight; }
     
     //--------------------------------------------------------------------------
     
@@ -232,12 +239,8 @@ public abstract class EngineCanvas extends AWTGLCanvas
                 isPointPick = false;
             }
             
-            enableOrthoView();
-            GL11.glDisable(GL11.GL_LIGHTING);
-            drawTextOnScreen();
-            GL11.glEnable(GL11.GL_LIGHTING);
-            disableOrthoView();
-
+            engineTools.draw();
+            
             GL11.glPopMatrix();
             swapBuffers();            
             frames.set(framesValue + 1);
@@ -248,18 +251,18 @@ public abstract class EngineCanvas extends AWTGLCanvas
     /** Draw the objects on the scene. */
     protected abstract void draw();
     
-    private void enableOrthoView()
+    void enableOrthoView()
     {
-        GL11.glPushMatrix();
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPushMatrix();
         GL11.glLoadIdentity();
-        GL11.glOrtho(0, currentWidth, currentHeight, 0, -1, 1);
+        GL11.glOrtho(0, currentWidth, 0, currentHeight, -1, 1);
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPushMatrix();
         GL11.glLoadIdentity();
     }
     
-    private void disableOrthoView()
+    void disableOrthoView()
     {
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPopMatrix();
@@ -354,7 +357,9 @@ public abstract class EngineCanvas extends AWTGLCanvas
     
     //--------------------------------------------------------------------------
 
+    private final SceneModel scene;
     private AtomicReference<Info> info;
+    private final EngineTools engineTools;
     
     private long startTime;
     private AtomicLong frames;

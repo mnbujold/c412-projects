@@ -30,23 +30,16 @@ public class IRSensor extends DistanceSensor
           	BufferedReader br = new BufferedReader(new InputStreamReader(in));
           	String strLine;
           	String[] strs;
-          	Double real;
           	Double mean;
           	Double var;
           	//Read File Line By Line
           	while ((strLine = br.readLine()) != null) {
           		strs = strLine.split(" ");
-          		//System.out.println(strLine);
           		if(strs.length==3){
-          			 //System.out.println(strs[0]+strs[1]+strs[2]);
-          			 real = new Double(strs[0]);
           			 mean = new Double(strs[1]);
           			 var = new Double(strs[2]);
-          			 //Object j =realtoMean.put(real, mean);
           			 realtoMean.add(mean);
           			 realtoVar.add(var);
-          			 //j=realtoVariance.put(real, var);
-//            			 System.out.println("here2");
           		}
           	}
           	in.close();
@@ -71,7 +64,6 @@ public class IRSensor extends DistanceSensor
     		sampleDist=800;
     	if(sampleDist<1)
     		sampleDist=1;
-    	//System.out.println(sampleDist+"\t"+realDistance + "\t"+rounded);
         return sampleDist;
     }
 
@@ -90,13 +82,9 @@ public class IRSensor extends DistanceSensor
     	double std_dev=Math.sqrt(varExpected);
     	if(std_dev>0){
     		double p=Gaussian.phi(sampleDistance, expected, std_dev);
-    		//System.out.println(p+"\t :"+sampleDistance+" "+realDistance);
     		return p;
     	}
-    	//if(sampleDistance==expected)
-    		//System.out.println(sampleDistance+" "+realDistance);
     	return (sampleDistance == expected) ? 1.0 : 0.0;
-        //return (sampleDistance == realDistance) ? 1.0 : 0.0;
     }
     private LinkedList<Double> realtoMean;
     private LinkedList<Double> realtoVar;
